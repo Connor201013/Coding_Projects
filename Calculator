@@ -1,0 +1,68 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        
+        System.out.println("Input Calculation (ex. Number Enter, Symbol Enter, and Number Enter. "); 
+        double answer = 0; 
+        double one = scan.nextDouble();
+        scan.nextLine();
+        String symbol = scan.nextLine();
+        double two = scan.nextDouble();
+        scan.nextLine();
+        
+        if(symbol.equals("/") && two == 0){
+            System.out.println("No Dividing by Zero!");
+        }
+        else if (symbol.equals("+")){
+            answer = one + two; 
+        }
+        else if(symbol.equals("-")){
+            answer = one - two; 
+        }
+        else if(symbol.equals("*")){
+            answer = one * two; 
+        }
+        else if(symbol.equals("/")){
+            answer = one / two; 
+        }
+        
+        // Inputs more than two numbers work in progress 
+        while (true) {
+            //Read the symbol exactly ONCE at the start of the loop
+            symbol = scan.nextLine();
+            
+            //Check for "=" immediately. If true, exit before asking for another number.
+            if(symbol.equals("=")){
+                break; 
+            }
+            
+            //Removed the duplicate symbol = scan.nextLine() that was here.
+            double to = scan.nextDouble(); 
+            scan.nextLine();
+            if(symbol.equals("/") && to == 0){
+                System.out.println("No Dividing by Zero!");
+            }
+            
+            else if (symbol.equals("+")){
+                answer += to; 
+            }
+            else if(symbol.equals("-")){
+                answer -= to; 
+            }
+            else if(symbol.equals("*")){
+                answer *= to; 
+            }
+            else if(symbol.equals("/")){
+                answer /= to; 
+            }
+            
+            // (Note: clear lines at the bottom are fine, but Java clears 'to' automatically on loop reset!)
+            symbol = "";
+            to = 0; 
+        }
+        
+        System.out.println("Answer: " + answer);
+    }
+}
