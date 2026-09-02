@@ -1,0 +1,128 @@
+import java.util.Scanner; 
+
+public class Main { 
+    public static void main(String[] args) { 
+        Scanner scan = new Scanner(System.in); 
+        
+        while (true) {
+            System.out.println("\n--- New Calculation ---");
+            System.out.println("Available Operators:");
+            System.out.println("Basic:  +, -, *, /");
+            System.out.println("Single: sqrRoot, sin, cos, tan, e, log");
+            System.out.println("Power:  sqr");
+            System.out.println("Enter Operator First:"); 
+            
+            double answer = 0; 
+            String symbol = scan.nextLine().trim();
+            
+            // Checks if operator only requires one number
+            if (symbol.equals("sqrRoot") || symbol.equals("log") || symbol.equals("sin") || symbol.equals("cos") || symbol.equals("tan") || symbol.equals("e")) {
+                System.out.println("Enter number:");
+                double one = Double.parseDouble(scan.nextLine().trim());
+                
+                if (symbol.equals("sqrRoot")){
+                    answer = Math.sqrt(one); 
+                } 
+                else if(symbol.equals("cos")){
+                    answer = Math.cos(one);
+                    } 
+                else if(symbol.equals("tan"))
+                { answer = Math.tan(one); 
+                    
+                } 
+                else if(symbol.equals("e")){
+                    answer = Math.exp(one);
+                } 
+                else if(symbol.equals("sin")){
+                    answer = Math.sin(one); 
+                }
+                if(symbol.equals("sqrRoot") && one <= 0){
+                        System.out.println("Not available on this operating system.");
+                }
+                
+                // Skips the while loop to output the solution immediately
+                System.out.println("Answer: " + answer);
+                
+            } else {
+                System.out.println("Enter first number:");
+                double one = Double.parseDouble(scan.nextLine().trim()); 
+                
+                System.out.println("Enter second number:");
+                double two = Double.parseDouble(scan.nextLine().trim()); 
+                
+                if(symbol.equals("/") && two == 0){ 
+                    System.out.println("No Dividing by Zero!"); 
+                } else if (symbol.equals("+")){ 
+                    answer = one + two; 
+                } else if(symbol.equals("-")){ 
+                    answer = one - two; 
+                } else if(symbol.equals("*")){ 
+                    answer = one * two; 
+                } else if(symbol.equals("/")){ 
+                    answer = one / two; 
+                } else if(symbol.equals("sqr")){ 
+                    answer = Math.pow(one, two); 
+                }
+                
+                // Sequential calculation loop for basic multi-number operations
+                while (true) { 
+                    System.out.println("Enter next operator or '=' to finish:");
+                    symbol = scan.nextLine().trim(); 
+                    if(symbol.equals("=")){ 
+                        break; 
+                    } 
+                    
+                    System.out.println("Enter next number:");
+                    double to = Double.parseDouble(scan.nextLine().trim()); 
+                    
+                    if(symbol.equals("/") && to == 0){ 
+                        System.out.println("No Dividing by Zero!"); 
+                    } 
+                    else if(symbol.equals("sqrRoot")){ 
+                        answer = Math.sqrt(to); 
+                    } 
+                    else if(symbol.equals("sqr")){ 
+                        answer = Math.pow(answer, to); 
+                    } 
+                    else if(symbol.equals("cos")){ 
+                        answer = Math.cos(to); 
+                    } 
+                    else if(symbol.equals("tan")){ 
+                        answer = Math.tan(to); 
+                    } 
+                    else if(symbol.equals("e")){ 
+                        answer = Math.exp(to); 
+                    } 
+                    else if(symbol.equals("sin")){ 
+                        answer = Math.sin(to); 
+                    } 
+                    else if (symbol.equals("+")){ 
+                        answer += to; 
+                    } else if(symbol.equals("-")){ 
+                        answer -= to; 
+                    } 
+                    else if(symbol.equals("*")){ 
+                        answer *= to; 
+                    } 
+                    else if(symbol.equals("/")){ 
+                        answer /= to; 
+                    } 
+                    
+                    symbol = ""; 
+                    to = 0; 
+                } 
+                System.out.println("Answer: " + answer); 
+                System.out.println("");
+            }
+
+            System.out.println("Type 'n' for new calculation or 'e' to exit:");
+            String choice = scan.nextLine().trim();
+            if (choice.equals("e")) {
+                break;
+            }
+        }
+        scan.close();
+    } 
+}
+
+
