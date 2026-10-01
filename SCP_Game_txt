@@ -148,7 +148,7 @@ public class Main {
             return;
         }
         while (true) {
-            System.out.println("\nSELECT YOUR ASSIGNED FACILITY PROFILE:");
+            System.out.println("\nSELECT YOUR ASSIGNED FACILITY PROFILE Anyone who does not have a wepon go south and search debris and shooting damage is luck:");
             System.out.println("1) D-Class Personnel (120 HP | Hardened: Panic rises 50% slower)");
             System.out.println("2) Foundation Scientist (80 HP | Analytical: Searching yields +3 Caution)");
             System.out.println("3) Facility Guard (100 HP | Armed: Starts with Sidearm)");
@@ -304,98 +304,98 @@ public class Main {
         } else {
             displaySite19Room();
         }
-        System.out.println("Your Inventory: " + (inventory.isEmpty() ? "[Empty]" : inventory));
+        System.out.println("\nYour Inventory: " + (inventory.isEmpty() ? "[Empty]" : inventory));
     }
     private static void displaySite20Room() {
         switch (currentRoom) {
             case "Sector 4 Hallway" -> {
-                System.out.println("You stand in a dripping concrete tunnel beneath the stadium pitch. Red security lights hum faintly.");
-                System.out.println("Exits: [north] SCP-096 containment room, [east] South Stand Vault, [south] sump.");
+                System.out.println("\nYou stand in a dripping concrete tunnel beneath the stadium pitch. Red security lights hum faintly.");
+                System.out.println("\nExits: [north] SCP-096 containment room, [east] South Stand Vault, [south] sump.");
             }
             case "The Armory" -> {
-                System.out.println("Racks of riot gear are smashed open. Stadium layout blueprints are strewn everywhere.");
+                System.out.println("\nRacks of riot gear are smashed open. Stadium layout blueprints are strewn everywhere.");
                 if (!inventory.contains("keycard")) {
-                    System.out.println("🔑 A heavy [Keycard] with Site-20 Master Clearance sits on a communications desk.");
+                    System.out.println("\n🔑 A heavy [Keycard] with Site-20 Master Clearance sits on a communications desk.");
                 }
-                System.out.println("Exits: [west] corridor, [north] Research Pod.");
+                System.out.println("\nExits: [west] corridor, [north] Research Pod.");
             }
             case "Research Laboratory" -> {
                 if (spyAlive) {
-                    System.out.println("🚨 AMBUSH! A rogue agent hiding behind stadium generator grids opens fire with an SMG!");
-                    System.out.println("Enemy HP: [" + spyHp + "/60]");
+                    System.out.println("\n🚨 AMBUSH! A rogue agent hiding behind stadium generator grids opens fire with an SMG!");
+                    System.out.println("\nEnemy HP: [" + spyHp + "/60]");
                 } else {
-                    System.out.println("The rogue agent lies neutralized by the server stacks.");
+                    System.out.println("\nThe rogue agent lies neutralized by the server stacks.");
 
                     if (!inventory.contains("stimulant")) {
                         System.out.println("💉 An emergency cabinet contains a [Combat Stimulant] auto-injector.");
                     }
                 }
-                System.out.println("Exits: [south] Vault, [west] broken maintenance viewport.");
+                System.out.println("\nExits: [south] Vault, [west] broken maintenance viewport.");
             }
             case "Shattered Observation Room" -> {
-                System.out.println("You are standing in the lower boiler room, steam swirling around giant rusted stadium mainlines.");
-                System.out.println("Exits: [east] Research Pod, [south] SCP-096 Containment Room.");
+                System.out.println("\nYou are standing in the lower boiler room, steam swirling around giant rusted stadium mainlines.");
+                System.out.println("\nExits: [east] Research Pod, [south] SCP-096 Containment Room.");
             }
             case "Sub-Level Maintenance Tunnel" -> {
-                System.out.println("Raw runoff water from the Stretford End pitch filters through iron grates. It's pitch black.");
-                System.out.println("Exits: [north] Cell Corridor.");
+                System.out.println("\nRaw runoff water from the Stretford End pitch filters through iron grates. It's pitch black.");
+                System.out.println("\nExits: [north] Cell Corridor.");
             }
             case "SCP-096 Containment Chamber" -> {
                 if (scp096Enraged) {
                     System.out.println("The containment room has been torn apart.");
                     System.out.println("SCP-096 is no longer sitting in the corner.");
                 } else {
-                    System.out.println("A reinforced containment room sits beneath the North Stand.");
-                    System.out.println("A pale figure sits motionless in the center of the room.");
-                    System.out.println("SCP-096 is covering its face and quietly sobbing.");
-                    System.out.println("A warning is painted across the observation glass:");
-                    System.out.println("DO NOT LOOK AT ITS FACE.");
+                    System.out.println("\nA reinforced containment room sits beneath the North Stand.");
+                    System.out.println("\nA pale figure sits motionless in the center of the room.");
+                    System.out.println("\nSCP-096 is covering its face and quietly sobbing.");
+                    System.out.println("\nA warning is painted across the observation glass:");
+                    System.out.println("\nDO NOT LOOK AT ITS FACE.");
                 }
                 System.out.println("Exits: [north] stadium elevator exit, [south] retreat.");
             }
             case "The Safe Zone" ->
-                    System.out.println("You emerge onto the fresh grass of the West Stand. Emergency vehicles surround the stadium perimeter.");
+                    System.out.println("\nYou emerge onto the fresh grass of the West Stand. Emergency vehicles surround the stadium perimeter.");
         }
     }
     private static void displaySite19Room() {
         switch (currentRoom) {
             case "Sector 4 Hallway" -> {
-                System.out.println("You are standing in a dimly lit concrete corridor. Red emergency lights flash slowly.");
-                System.out.println("Exits: [north] heavy door, [east] Armory, [south] dark tunnel.");
+                System.out.println("\nYou are standing in a dimly lit concrete corridor. Red emergency lights flash slowly.");
+                System.out.println("\nExits: [north] heavy door, [east] Armory, [south] dark tunnel.");
             }
             case "The Armory" -> {
-                System.out.println("Shelves are knocked over and papers line the floor.");
+                System.out.println("\nShelves are knocked over and papers line the floor.");
                 if (!inventory.contains("keycard")) {
-                    System.out.println("🔑 A heavy, brushed-steel [Keycard] with Level-4 clearance sits on a desk.");
+                    System.out.println("/n🔑 A heavy, brushed-steel [Keycard] with Level-4 clearance sits on a desk.");
                 }
                 System.out.println("Exits: [west] Hallway, [north] Research Lab.");
             }
             case "Research Laboratory" -> {
                 if (spyAlive) {
-                    System.out.println("🚨 AMBUSH! A rogue Chaos Insurgency Spy has pinned you down with an assault rifle!");
-                    System.out.println("Enemy HP: [" + spyHp + "/60]");
+                    System.out.println("\n🚨 AMBUSH! A rogue Chaos Insurgency Spy has pinned you down with an assault rifle!");
+                    System.out.println("\nEnemy HP: [" + spyHp + "/60]");
                 } else {
-                    System.out.println("The Chaos Insurgency Spy lies neutralized on the floor.");
+                    System.out.println("\nThe Chaos Insurgency Spy lies neutralized on the floor.");
                     if (!inventory.contains("stimulant")) {
                         System.out.println("💉 A wall-mounted emergency case contains a [Combat Stimulant] auto-injector.");
                     }
                 }
-                System.out.println("Exits: [south] Armory, [west] shattered observation window.");
+                System.out.println("\nExits: [south] Armory, [west] shattered observation window.");
             }
             case "Shattered Observation Room" -> {
-                System.out.println("You are looking through a broken window overlooking an isolation cell.");
-                System.out.println("Exits: [east] Lab, [south] SCP-173 Containment Chamber.");
+                System.out.println("\nYou are looking through a broken window overlooking an isolation cell.");
+                System.out.println("\nExits: [east] Lab, [south] SCP-173 Containment Chamber.");
             }
             case "Sub-Level Maintenance Tunnel" -> {
-                System.out.println("Water drips from rusted overhead pipes. Steam limits your visibility.");
-                System.out.println("Exits: [north] Hallway.");
+                System.out.println("\nWater drips from rusted overhead pipes. Steam limits your visibility.");
+                System.out.println("\nExits: [north] Hallway.");
             }
             case "SCP-173 Containment Chamber" -> {
-                System.out.println("The heavy blast doors shut tight behind you. Inside, a concrete statue stands frozen in the dark.");
-                System.out.println("Exits: [north] exit, [south] retreat.");
+                System.out.println("\nThe heavy blast doors shut tight behind you. Inside, a concrete statue stands frozen in the dark.");
+                System.out.println("\nExits: [north] exit, [south] retreat.");
             }
             case "The Safe Zone" ->
-                    System.out.println("A heavily reinforced bunker line filled with MTF guards.");
+                    System.out.println("\nA heavily reinforced bunker line filled with MTF guards.");
         }
     }
     // Actions
@@ -675,10 +675,10 @@ public class Main {
     // Narrative
     private static String generateAiNarrativeFragment() {
         if (playerClass.equals("Site-20 D-Class")) {
-            return "🎨 [AI Override] Site-20 Core Active. Under Old Trafford stadium grids. Escape routes heavily locked.";
+            return "\n🎨 [AI Override] Site-20 Core Active. Under Old Trafford stadium grids. Escape routes heavily locked.";
         }
         if (isO5()) {
-            return "🎨 [AI Override] Priority Council connection confirmed. Facility tracking synchronized.";
+            return "\n🎨 [AI Override] Priority Council connection confirmed. Facility tracking synchronized.";
         }
         String[] panicPhrases = {
                 "Heart rate spiking.",
@@ -696,12 +696,12 @@ public class Main {
                 "Static feeds processing."
         };
         if (panicLevel > cautionLevel && panicLevel > 3) {
-            return "🎨 [AI Override] " + panicPhrases[RAND.nextInt(panicPhrases.length)];
+            return "\n🎨 [AI Override] " + panicPhrases[RAND.nextInt(panicPhrases.length)];
         }
         if (cautionLevel > panicLevel && cautionLevel > 3) {
-            return "🎨 [AI Override] " + cautionPhrases[RAND.nextInt(cautionPhrases.length)];
+            return "\n🎨 [AI Override] " + cautionPhrases[RAND.nextInt(cautionPhrases.length)];
         }
-        return "🎨 [AI Override] " + neutralPhrases[RAND.nextInt(neutralPhrases.length)];
+        return "\n🎨 [AI Override] " + neutralPhrases[RAND.nextInt(neutralPhrases.length)];
     }
     // Help
     private static void displayHelpMenu() {
@@ -742,7 +742,7 @@ public class Main {
         if (!currentRoom.equals("The Safe Zone")) {
             return;
         }
-        System.out.println("\n====================================================");
+System.out.println("\n====================================================");
         System.out.println("🎉 BOUNDARY AREA REACHED! RUN METRICS LOGGED. 🎉");
         System.out.println("====================================================");
         if (isO5()) {
@@ -782,4 +782,3 @@ public class Main {
         }
     }
 }
-
