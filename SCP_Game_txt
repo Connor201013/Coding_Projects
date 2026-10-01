@@ -1,0 +1,862 @@
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Scanner;
+
+public class Main {
+
+    // Game State
+    private static boolean o5ClassUnlocked = false;
+    private static boolean trappedInSite20 = false;
+
+    private static String currentRoom = "Sector 4 Hallway";
+    private static final ArrayList<String> inventory = new ArrayList<>();
+
+    private static boolean isGameOver = false;
+    private static int panicLevel = 0;
+    private static int cautionLevel = 0;
+    private static int turnsTaken = 0;
+
+    // Player
+    private static String playerClass = "";
+    private static int maxHp = 100;
+    private static int playerHp = 100;
+
+    // Enemies
+    private static int spyHp = 60;
+    private static boolean spyAlive = true;
+
+    private static String scp096Room = "Sub-Level Maintenance Tunnel";
+    private static boolean scp096Enraged = false;
+
+    private static int blinkTimer = 3;
+
+    private static final Random RAND = new Random();
+
+    public static void main(String[] args) {
+        try (Scanner scan = new Scanner(System.in)) {
+            boolean runningApplication = true;
+
+            while (runningApplication) {
+                resetRunState();
+                printTitle();
+                chooseCharacterClass(scan);
+                printOpening();
+
+                while (!isGameOver) {
+                    turnsTaken++;
+
+                    if (currentRoom.equals("SCP-173 Containment Chamber") && blinkTimer <= 0) {
+                        System.out.println("\n💀 [BLINK FAIL] Your eyes dried out. You blinked for a split second.");
+                        System.out.println("The concrete statue closed the gap instantly. Your neck is snapped.");
+                        playerHp = 0;
+                        checkWinLossConditions(scan);
+                        break;
+                    }
+
+                    displayRoomDescription();
+                    handleScp096Encounter(scan);
+
+                    if (isGameOver) break;
+
+                    displayAvailableActions();
+                    System.out.print("What do you want to do? > ");
+
+                    String input = scan.nextLine().toLowerCase().trim();
+                    processPlayerAction(input);
+
+                    if (isGameOver) break;
+
+                    if (currentRoom.equals("SCP-173 Containment Chamber") && !input.equals("blink")) {
+                        blinkTimer--;
+
+                        if (blinkTimer <= 0) {
+                            System.out.println("\n💀 [BLINK FAIL] Your eyes dried out. The statue moves.");
+                            playerHp = 0;
+                            checkWinLossConditions(scan);
+                            break;
+                        }
+                    }
+
+                    if (currentRoom.equals("Research Laboratory") && spyAlive && !isGameOver) {
+                        executeSpyTurn();
+                    }
+
+                    if (isGameOver) break;
+
+                    if (currentRoom.equals(scp096Room) && scp096Enraged && !isGameOver) {
+                        executeScp096Attack();
+                    }
+
+                    if (isGameOver) {
+                        checkWinLossConditions(scan);
+                        break;
+                    }
+
+                    roamScp096();
+                    checkWinLossConditions(scan);
+                }
+
+                System.out.print("\nWould you like to restart application simulations? (yes/no) > ");
+                String playAgain = scan.nextLine().toLowerCase().trim();
+
+                if (!playAgain.equals("yes") && !playAgain.equals("y")) {
+                    runningApplication = false;
+                }
+            }
+
+            System.out.println("\nThank you for playing Site 19 SCP Foundation.");
+        }
+    }
+
+    // Reset
+    private static void resetRunState() {
+        currentRoom = "Sector 4 Hallway";
+        inventory.clear();
+        isGameOver = false;
+
+        panicLevel = 0;
+        cautionLevel = 0;
+        turnsTaken = 0;
+
+        spyHp = 60;
+        spyAlive = true;
+
+        scp096Room = "Sub-Level Maintenance Tunnel";
+        scp096Enraged = false;
+        blinkTimer = 3;
+
+        playerClass = "";
+        maxHp = 100;
+        playerHp = 100;
+    }
+
+    // Title
+    private static void printTitle() {
+        System.out.println("====================================================");
+
+        if (trappedInSite20) {
+            System.out.println("     SITE 20: DEEP SUBTERRANEAN OLD TRAFFORD BASE");
+        } else {
+            System.out.println("        SITE 19: SCP FOUNDATION CONTAINMENT BREACH");
+        }
+
+        System.out.println("====================================================");
+    }
+
+    // Opening
+    private static void printOpening() {
+        if (trappedInSite20) {
+            System.out.println("\n[LOGISTICAL DATA] You awake trapped inside a damp cell block deep below the football pitch.");
+            System.out.println("The crowd's roar above is muffled by fifty meters of solid concrete. Sirens echo.");
+        } else {
+            System.out.println("\nAn accident has occurred. Spy infiltration is suspected.");
+            System.out.println("Keep your head on a swivel and escape the facility.");
+        }
+
+        System.out.println("🚨 WARNING: Anomalies are mobile. Keep track of environment parameters.");
+        System.out.println("💡 TIP: Type 'help' at any time to see valid commands!\n");
+    }
+
+    // Character Selection
+    private static void chooseCharacterClass(Scanner scan) {
+        if (trappedInSite20) {
+            playerClass = "Site-20 D-Class";
+            maxHp = 120;
+            playerHp = 120;
+
+            System.out.println("\n🔒 AUTO-ASSIGNMENT: Site-20 D-Class Profile Confirmed. Survival systems active.");
+            return;
+        }
+
+        while (true) {
+            System.out.println("\nSELECT YOUR ASSIGNED FACILITY PROFILE:");
+            System.out.println("1) D-Class Personnel (120 HP | Hardened: Panic rises 50% slower)");
+            System.out.println("2) Foundation Scientist (80 HP | Analytical: Searching yields +3 Caution)");
+            System.out.println("3) Facility Guard (100 HP | Armed: Starts with Sidearm)");
+
+            if (o5ClassUnlocked) {
+                System.out.println("4) [UNLOCKED] O5 Council Member (150 HP | Omniscient Trackers | Keycard Start)");
+            } else {
+                System.out.println("4) [LOCKED] ??? (Escape the facility in under 15 turns to unlock this legendary profile)");
+            }
+
+            System.out.print("Enter selection > ");
+            String choice = scan.nextLine().trim();
+
+            switch (choice) {
+                case "1" -> {
+                    playerClass = "D-Class";
+                    maxHp = 120;
+                    playerHp = 120;
+                    System.out.println("Profile Confirmed. Survival systems activated.");
+                    return;
+                }
+
+                case "2" -> {
+                    playerClass = "Scientist";
+                    maxHp = 80;
+                    playerHp = 80;
+                    inventory.add("stimulant");
+                    System.out.println("Selected: Foundation Scientist.");
+                    return;
+                }
+
+                case "3" -> {
+                    playerClass = "Guard";
+                    maxHp = 100;
+                    playerHp = 100;
+                    inventory.add("sidearm");
+                    System.out.println("Selected: Facility Guard.");
+                    return;
+                }
+
+                case "4" -> {
+                    if (o5ClassUnlocked) {
+                        playerClass = "O5 Council";
+                        maxHp = 150;
+                        playerHp = 150;
+                        inventory.add("keycard");
+                        System.out.println("Selected: O5 Council Member.");
+                        return;
+                    }
+
+                    System.out.println("❌ Choice invalid or profile currently restricted.");
+                }
+
+                default -> System.out.println("❌ Choice invalid or profile currently restricted.");
+            }
+        }
+    }
+
+    // Class Helpers
+    private static boolean isDClass() {
+        return playerClass.equals("D-Class") || playerClass.equals("Site-20 D-Class");
+    }
+
+    private static boolean isO5() {
+        return playerClass.equals("O5 Council");
+    }
+
+    private static boolean isScientist() {
+        return playerClass.equals("Scientist");
+    }
+
+    // SCP-096
+    private static void roamScp096() {
+        if (scp096Enraged) {
+            scp096Room = currentRoom;
+            return;
+        }
+
+        String[] rooms = {
+            "Sector 4 Hallway",
+            "The Armory",
+            "Research Laboratory",
+            "Shattered Observation Room",
+            "Sub-Level Maintenance Tunnel",
+            "SCP-173 Containment Chamber"
+        };
+
+        if (RAND.nextInt(100) < 40) {
+            scp096Room = rooms[RAND.nextInt(rooms.length)];
+        }
+    }
+
+    private static void handleScp096Encounter(Scanner scan) {
+        if (!currentRoom.equals(scp096Room)) return;
+
+        System.out.println("\n⚠️⚠️⚠️ WARNING ⚠️⚠️⚠️");
+
+        if (scp096Enraged) {
+            System.out.println("🔴 SCP-096 IS ENRAGED! Screaming fills your location coordinates!");
+            return;
+        }
+
+        if (isO5()) {
+            System.out.println("👑 SCP-096 is huddled nearby. Utilizing absolute clearance knowledge, you gaze away seamlessly.");
+            cautionLevel += 4;
+            return;
+        }
+
+        System.out.println("An emaciated creature is sobbing in the corner, holding its face.");
+        System.out.println("CRITICAL: Choose gaze trajectory ('look down' / 'look up')");
+        System.out.print("Your choice > ");
+
+        String gaze = scan.nextLine().toLowerCase().trim();
+
+        if (gaze.contains("up") || gaze.contains("look at")) {
+            scp096Enraged = true;
+
+            if (!isO5()) panicLevel += 8;
+
+            System.out.println("\n😱 SCP-096's jaw hyperextends. Its weeping morphs into an absolute shriek!");
+        } else {
+            cautionLevel += 4;
+            System.out.println("\n🛡️ You lock eyes on the concrete floors. Avoidance matrix logging stable.");
+        }
+    }
+
+    // Room Description
+    private static void displayRoomDescription() {
+        System.out.println("----------------------------------------------------");
+
+        if (trappedInSite20) {
+            String site20Name = switch (currentRoom) {
+                case "Sector 4 Hallway" -> "Sub-Pitch Cell Corridor";
+                case "The Armory" -> "South Stand Armory Vault";
+                case "Research Laboratory" -> "Auxiliary Research Pod";
+                case "Shattered Observation Room" -> "Lower Boiler Plexus";
+                case "Sub-Level Maintenance Tunnel" -> "Stretford End Drainage Sump";
+                case "SCP-173 Containment Chamber" -> "Deep Stadium Utility Shaft";
+                case "The Safe Zone" -> "Bobby Charlton West Stand Exit";
+                default -> currentRoom;
+            };
+
+            System.out.println("Location: [Site-20] " + site20Name + " | HP: " + playerHp + "/" + maxHp + " | Metrics: P[" + panicLevel + "] C[" + cautionLevel + "]");
+        } else {
+            System.out.println("Location: [Site-19] " + currentRoom + " | HP: " + playerHp + "/" + maxHp + " | Metrics: P[" + panicLevel + "] C[" + cautionLevel + "]");
+        }
+
+        if (isO5()) {
+            System.out.println("👁️ [O5 Intel HUD] SCP-096 Location: " + scp096Room + " | Spy Alive: " + spyAlive);
+        }
+
+        if (currentRoom.equals("SCP-173 Containment Chamber")) {
+            System.out.println("⏳ [VISUAL LOCK WARNING] Blink safety remaining: " + blinkTimer + " action(s).");
+        }
+
+        System.out.println(generateAiNarrativeFragment());
+
+        if (trappedInSite20) {
+            displaySite20Room();
+        } else {
+            displaySite19Room();
+        }
+
+        System.out.println("Your Inventory: " + (inventory.isEmpty() ? "[Empty]" : inventory));
+    }
+
+    private static void displaySite20Room() {
+        switch (currentRoom) {
+            case "Sector 4 Hallway" -> {
+                System.out.println("You stand in a dripping concrete tunnel beneath the stadium pitch. Red security lights hum faintly.");
+                System.out.println("Exits: [north] blast shaft, [east] South Stand Vault, [south] sump.");
+            }
+
+            case "The Armory" -> {
+                System.out.println("Racks of riot gear are smashed open. Stadium layout blueprints are strewn everywhere.");
+
+                if (!inventory.contains("keycard")) {
+                    System.out.println("🔑 A heavy [Keycard] with Site-20 Master Clearance sits on a communications desk.");
+                }
+
+                System.out.println("Exits: [west] corridor, [north] Research Pod.");
+            }
+
+            case "Research Laboratory" -> {
+                if (spyAlive) {
+                    System.out.println("🚨 AMBUSH! A rogue agent hiding behind stadium generator grids opens fire with an SMG!");
+                    System.out.println("Enemy HP: [" + spyHp + "/60]");
+                } else {
+                    System.out.println("The rogue agent lies neutralized by the server stacks.");
+
+                    if (!inventory.contains("stimulant")) {
+                        System.out.println("💉 An emergency cabinet contains a [Combat Stimulant] auto-injector.");
+                    }
+                }
+
+                System.out.println("Exits: [south] Vault, [west] broken maintenance viewport.");
+            }
+
+            case "Shattered Observation Room" -> {
+                System.out.println("You are standing in the lower boiler room, steam swirling around giant rusted stadium mainlines.");
+                System.out.println("Exits: [east] Research Pod, [south] Utility Shaft.");
+            }
+
+            case "Sub-Level Maintenance Tunnel" -> {
+                System.out.println("Raw runoff water from the Stretford End pitch filters through iron grates. It's pitch black.");
+                System.out.println("Exits: [north] Cell Corridor.");
+            }
+
+            case "SCP-173 Containment Chamber" -> {
+                System.out.println("Hydraulic stadium support beams grind overhead. A concrete statue stands frozen under a flickering bulb.");
+                System.out.println("Exits: [north] pitch elevator exit, [south] retreat.");
+            }
+
+            case "The Safe Zone" -> System.out.println("You emerge onto the fresh grass of the West Stand. Emergency vehicles surround the stadium perimeter.");
+        }
+    }
+
+    private static void displaySite19Room() {
+        switch (currentRoom) {
+            case "Sector 4 Hallway" -> {
+                System.out.println("You are standing in a dimly lit concrete corridor. Red emergency lights flash slowly.");
+                System.out.println("Exits: [north] heavy door, [east] Armory, [south] dark tunnel.");
+            }
+
+            case "The Armory" -> {
+                System.out.println("Shelves are knocked over and papers line the floor.");
+
+                if (!inventory.contains("keycard")) {
+                    System.out.println("🔑 A heavy, brushed-steel [Keycard] with Level-4 clearance sits on a desk.");
+                }
+
+                System.out.println("Exits: [west] Hallway, [north] Research Lab.");
+            }
+
+            case "Research Laboratory" -> {
+                if (spyAlive) {
+                    System.out.println("🚨 AMBUSH! A rogue Chaos Insurgency Spy has pinned you down with an assault rifle!");
+                    System.out.println("Enemy HP: [" + spyHp + "/60]");
+                } else {
+                    System.out.println("The Chaos Insurgency Spy lies neutralized on the floor.");
+
+                    if (!inventory.contains("stimulant")) {
+                        System.out.println("💉 A wall-mounted emergency case contains a [Combat Stimulant] auto-injector.");
+                    }
+                }
+
+                System.out.println("Exits: [south] Armory, [west] shattered observation window.");
+            }
+
+            case "Shattered Observation Room" -> {
+                System.out.println("You are looking through a broken window overlooking an isolation cell.");
+                System.out.println("Exits: [east] Lab, [south] SCP Containment Chamber.");
+            }
+
+            case "Sub-Level Maintenance Tunnel" -> {
+                System.out.println("Water drips from rusted overhead pipes. Steam limits your visibility.");
+                System.out.println("Exits: [north] Hallway.");
+            }
+
+            case "SCP-173 Containment Chamber" -> {
+                System.out.println("The heavy blast doors shut tight behind you. Inside, a concrete statue stands frozen in the dark.");
+                System.out.println("Exits: [north] exit, [south] retreat.");
+            }
+
+            case "The Safe Zone" -> System.out.println("A heavily reinforced bunker line filled with MTF guards.");
+        }
+    }
+
+    // Actions
+    private static void displayAvailableActions() {
+        if (currentRoom.equals("Research Laboratory") && spyAlive) {
+            System.out.println("\n💥 [COMBAT ACTIONS: 'shoot', 'take cover', 'use stimulant']");
+        } else if (currentRoom.equals("SCP-173 Containment Chamber")) {
+            System.out.println("\n👁️ [COUNTERMEASURES: 'blink', 'go north', 'go south']");
+        } else {
+            System.out.println("\n[Available Actions: movement, 'take keycard', 'take stimulant', 'search debris', 'help']");
+        }
+    }
+
+    private static void processPlayerAction(String input) {
+        if (currentRoom.equals("Research Laboratory") && spyAlive && isMovementCommand(input)) {
+            System.out.println("❌ Escape blocked! The enemy has pinned you down.");
+
+            if (!isO5()) {
+                panicLevel += isDClass() ? 1 : 2;
+            }
+
+            return;
+        }
+
+        switch (input) {
+            case "help", "h", "commands" -> displayHelpMenu();
+
+            case "blink" -> {
+                if (currentRoom.equals("SCP-173 Containment Chamber")) {
+                    blinkTimer = 3;
+                    System.out.println("👁️ You blink deliberately. Visual target lock stabilized.");
+                } else {
+                    System.out.println("❌ Blinking serves no functional defensive role here.");
+                }
+            }
+
+            case "shoot", "fire" -> shoot();
+
+            case "take cover", "cover" -> {
+                System.out.println("🛡️ Hard defensive positions established.");
+                cautionLevel += 3;
+
+                if (!isO5() && panicLevel > 0) {
+                    panicLevel = Math.max(0, panicLevel - 2);
+                }
+            }
+
+            case "use stimulant", "use medkit" -> useStimulant();
+
+            case "north", "go north" -> moveNorth();
+
+            case "east", "go east" -> moveEast();
+
+            case "west", "go west" -> moveWest();
+
+            case "south", "go south" -> moveSouth();
+
+            case "take keycard", "grab keycard", "keycard" -> takeKeycard();
+
+            case "take stimulant", "grab stimulant", "stimulant" -> takeStimulant();
+
+            case "search debris", "search", "explore" -> search();
+
+            default -> {
+                System.out.println("❌ Command unrecognized.");
+
+                if (!isO5()) {
+                    panicLevel += isDClass() ? 0 : 1;
+                }
+            }
+        }
+
+        clampPlayerMetrics();
+    }
+
+    private static void shoot() {
+        if (!inventory.contains("sidearm")) {
+            System.out.println("❌ No weapon platform equipped.");
+
+            if (!isO5()) panicLevel += 2;
+            return;
+        }
+
+        int adjustedPanic = Math.max(0, Math.min(panicLevel, 12));
+        int accuracyChance = Math.min(95, 45 + adjustedPanic * 4);
+
+        if (RAND.nextInt(100) < accuracyChance) {
+            int damage = 20 + RAND.nextInt(15);
+
+            if (currentRoom.equals(scp096Room)) {
+                System.out.println("💥 Sparks fly off SCP-096. It shrieks louder!");
+                scp096Enraged = true;
+                return;
+            }
+
+            if (currentRoom.equals("Research Laboratory") && spyAlive) {
+                spyHp -= damage;
+                System.out.println("💥 Hit confirmed! You dealt " + damage + " damage!");
+
+                if (spyHp <= 0) {
+                    spyHp = 0;
+                    spyAlive = false;
+                    System.out.println("💀 The hostile agent has been neutralized!");
+                }
+
+                return;
+            }
+
+            System.out.println("💥 Shot fired, but there is no valid target.");
+        } else {
+            System.out.println("💨 Round missed target boundaries.");
+
+            if (!isO5()) panicLevel++;
+        }
+    }
+
+    private static void useStimulant() {
+        if (inventory.contains("stimulant")) {
+            inventory.remove("stimulant");
+            playerHp = Math.min(maxHp, playerHp + 45);
+            panicLevel = 0;
+            System.out.println("💉 Injector discharged. Biometric indices restored.");
+        } else {
+            System.out.println("❌ Resource absent.");
+        }
+    }
+
+    // Movement
+    private static void moveNorth() {
+        switch (currentRoom) {
+            case "Sector 4 Hallway" -> {
+                if (inventory.contains("keycard")) {
+                    System.out.println("🔑 Clearance confirmed. Structural decompression active.");
+                    currentRoom = "SCP-173 Containment Chamber";
+                    blinkTimer = 3;
+                } else {
+                    System.out.println("❌ Locked. Insufficient authorization tags.");
+                    cautionLevel += 2;
+                }
+            }
+
+            case "The Armory" -> currentRoom = "Research Laboratory";
+
+            case "SCP-173 Containment Chamber" -> currentRoom = "The Safe Zone";
+
+            case "Sub-Level Maintenance Tunnel" -> currentRoom = "Sector 4 Hallway";
+
+            default -> System.out.println("❌ Structural block.");
+        }
+    }
+
+    private static void moveEast() {
+        switch (currentRoom) {
+            case "Sector 4 Hallway" -> currentRoom = "The Armory";
+            case "Shattered Observation Room" -> currentRoom = "Research Laboratory";
+            default -> System.out.println("❌ Path unavailable.");
+        }
+    }
+
+    private static void moveWest() {
+        switch (currentRoom) {
+            case "The Armory" -> currentRoom = "Sector 4 Hallway";
+            case "Research Laboratory" -> currentRoom = "Shattered Observation Room";
+            default -> System.out.println("❌ Line blocked.");
+        }
+    }
+
+    private static void moveSouth() {
+        switch (currentRoom) {
+            case "SCP-173 Containment Chamber" -> {
+                System.out.println("🏃 Retracting backward out of containment zones.");
+                currentRoom = "Sector 4 Hallway";
+                blinkTimer = 3;
+
+                if (!isO5()) {
+                    panicLevel += isDClass() ? 1 : 3;
+                }
+            }
+
+            case "Research Laboratory" -> currentRoom = "The Armory";
+
+            case "Shattered Observation Room" -> {
+                currentRoom = "SCP-173 Containment Chamber";
+                blinkTimer = 3;
+            }
+
+            case "Sector 4 Hallway" -> currentRoom = "Sub-Level Maintenance Tunnel";
+
+            default -> System.out.println("❌ Direct dead end.");
+        }
+    }
+
+    // Items
+    private static void takeKeycard() {
+        if (currentRoom.equals("The Armory") && !inventory.contains("keycard")) {
+            inventory.add("keycard");
+            System.out.println("🎒 Authorization keycard stored.");
+        } else {
+            System.out.println("❌ Nothing to take.");
+        }
+    }
+
+    private static void takeStimulant() {
+        if (currentRoom.equals("Research Laboratory") && !spyAlive && !inventory.contains("stimulant")) {
+            inventory.add("stimulant");
+            System.out.println("🎒 Medical injection unit stored.");
+        } else {
+            System.out.println("❌ Cannot extract resource assets at this time.");
+        }
+    }
+
+    private static void search() {
+        cautionLevel += isScientist() ? 4 : 1;
+
+        if (currentRoom.equals("Sub-Level Maintenance Tunnel")) {
+            if (trappedInSite20) {
+                if (!inventory.contains("handbook")) {
+                    inventory.add("handbook");
+                    System.out.println("📘 SEARCH SUCCESS! You find an official [Ref Handbook] in the drainage silt.");
+                    System.out.println("🏃 RULE BONUS: The handbook improves your tactical positioning.");
+                    cautionLevel += 3;
+                } else {
+                    System.out.println("🔍 You search the drainage sump mud again, but find nothing else.");
+                }
+            } else {
+                if (!inventory.contains("sidearm")) {
+                    inventory.add("sidearm");
+                    System.out.println("🔍 You found a functional tactical sidearm in the mud matrix!");
+                } else {
+                    System.out.println("🔍 No further asset returns.");
+                }
+            }
+        } else {
+            System.out.println("🔍 No local structural scrap found.");
+        }
+    }
+
+    private static boolean isMovementCommand(String input) {
+        return input.startsWith("go ")
+                || input.equals("north")
+                || input.equals("south")
+                || input.equals("east")
+                || input.equals("west");
+    }
+
+    // Combat
+    private static void executeSpyTurn() {
+        if (!spyAlive) return;
+
+        System.out.println("\n⚡ [ENEMY TURN] Hostile agent fires standard weapon cycles!");
+
+        int dodgeChance = Math.min(95, 15 + cautionLevel * 4);
+
+        if (RAND.nextInt(100) < dodgeChance) {
+            System.out.println("🛡️ Structural shield frames absorbed the rounds.");
+        } else {
+            int damage = 15 + RAND.nextInt(15);
+            playerHp -= damage;
+
+            System.out.println("🔴 Critical hit! Damage sustained: -" + damage + " HP.");
+
+            if (!isO5()) panicLevel += 2;
+        }
+
+        clampPlayerMetrics();
+    }
+
+    private static void executeScp096Attack() {
+        System.out.println("\n👹 [SCP-096 ATTACK] Claws tear directly through defensive barriers!");
+
+        if (inventory.contains("handbook")) {
+            System.out.println("🏃 REF BUFF: You check movement vectors inside the handbook and safely out-position the charge.");
+
+            int damage = 15 + RAND.nextInt(10);
+            playerHp -= damage;
+
+            System.out.println("🛡️ Mitigated Impact! You took a reduced -" + damage + " HP.");
+        } else {
+            int damage = 35 + RAND.nextInt(20);
+            playerHp -= damage;
+
+            System.out.println("🔴 Shockwave impact! Sustained: -" + damage + " HP.");
+
+            if (!isO5()) panicLevel += 5;
+        }
+
+        clampPlayerMetrics();
+    }
+
+    // Narrative
+    private static String generateAiNarrativeFragment() {
+        if (playerClass.equals("Site-20 D-Class")) {
+            return "🎨 [AI Override] Site-20 Core Active. Under Old Trafford stadium grids. Escape routes heavily locked.";
+        }
+
+        if (isO5()) {
+            return "🎨 [AI Override] Priority Council connection confirmed. Facility tracking synchronized.";
+        }
+
+        String[] panicPhrases = {
+            "Heart rate spiking.",
+            "Movement traces tracked.",
+            "Klaxons active."
+        };
+
+        String[] cautionPhrases = {
+            "Methodical pacing safe.",
+            "Environmental safety logged.",
+            "Low profile monitored."
+        };
+
+        String[] neutralPhrases = {
+            "Breach state ongoing.",
+            "Recirculated gas pumping.",
+            "Static feeds processing."
+        };
+
+        if (panicLevel > cautionLevel && panicLevel > 3) {
+            return "🎨 [AI Override] " + panicPhrases[RAND.nextInt(panicPhrases.length)];
+        }
+
+        if (cautionLevel > panicLevel && cautionLevel > 3) {
+            return "🎨 [AI Override] " + cautionPhrases[RAND.nextInt(cautionPhrases.length)];
+        }
+
+        return "🎨 [AI Override] " + neutralPhrases[RAND.nextInt(neutralPhrases.length)];
+    }
+
+    // Help
+    private static void displayHelpMenu() {
+        System.out.println("\n================ COMMANDS ================");
+        System.out.println("Movement:");
+        System.out.println("  north / south / east / west");
+        System.out.println("  go north / go south / go east / go west");
+
+        System.out.println("\nItems:");
+        System.out.println("  take keycard");
+        System.out.println("  take stimulant");
+
+        System.out.println("\nActions:");
+        System.out.println("  search debris");
+        System.out.println("  shoot");
+        System.out.println("  take cover");
+        System.out.println("  blink");
+        System.out.println("  use stimulant");
+
+        System.out.println("==========================================");
+    }
+
+    // Safety
+    private static void clampPlayerMetrics() {
+        playerHp = Math.max(0, Math.min(playerHp, maxHp));
+        panicLevel = Math.max(0, panicLevel);
+        cautionLevel = Math.max(0, cautionLevel);
+    }
+
+    // Win / Loss
+    private static void checkWinLossConditions(Scanner scan) {
+        clampPlayerMetrics();
+
+        if (playerHp <= 0) {
+            System.out.println("\n💀 [GAME OVER] Core lifesign metrics hit terminal exhaustion.");
+            isGameOver = true;
+            return;
+        }
+
+        if (currentRoom.equals("SCP-173 Containment Chamber") && !inventory.contains("keycard")) {
+            System.out.println("\n💀 [GAME OVER] Lockout failure. Anomaly terminal contact recorded.");
+            isGameOver = true;
+            return;
+        }
+
+        if (!currentRoom.equals("The Safe Zone")) return;
+
+        System.out.println("\n====================================================");
+        System.out.println("🎉 BOUNDARY AREA REACHED! RUN METRICS LOGGED. 🎉");
+        System.out.println("====================================================");
+
+        if (isO5()) {
+            handleO5Ending(scan);
+            isGameOver = true;
+            return;
+        }
+
+        System.out.println("Escape logged safely. Spent actions pool: " + turnsTaken);
+
+        if (turnsTaken < 15 && !o5ClassUnlocked && !trappedInSite20) {
+            o5ClassUnlocked = true;
+            System.out.println("🔓 O5 Council Class unlocked for fast performance parameters!");
+        }
+
+        if (trappedInSite20) {
+            System.out.println("⚠️ Site-20 status remains active. The Foundation has not restored your clearance.");
+            System.out.println("You escaped the underground facility, but your D-Class designation remains.");
+        }
+
+        isGameOver = true;
+    }
+
+    // O5 Ending
+    private static void handleO5Ending(Scanner scan) {
+        System.out.println("Council Member, MTF teams await your final tactical override code.");
+        System.out.println("1) CHOOSE SANITY: Secure Site-19, lock anomalies down, maintain Foundation balance.");
+        System.out.println("2) CHOOSE APOCALYPSE: Wipe every single SCP anomaly out and detonate the planetary cluster.");
+        System.out.print("Input directive profile (1-2) > ");
+
+        String decision = scan.nextLine().trim();
+
+        if (decision.equals("2")) {
+            System.out.println("\n💥 CASCADE EVENT TRIGGERED. The core planetary nodes explode.");
+            System.out.println("The cascading shockwave causes an XK-Class End-of-the-World scenario.");
+            System.out.println("Global node oversight tags you as a rogue operational asset.");
+            System.out.println("🔴 SENTENCING CONFIRMED: You are permanently sent to Site-20 below Old Trafford stadium as a D-Class asset.");
+
+            o5ClassUnlocked = false;
+            trappedInSite20 = true;
+        } else {
+            System.out.println("\n🛡️ Equilibrium restored. Your Council seat is protected.");
+
+            o5ClassUnlocked = true;
+            trappedInSite20 = false;
+        }
+    }
+}
