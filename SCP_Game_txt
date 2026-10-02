@@ -13,16 +13,13 @@ public class Main {
     private static int panicLevel = 0;
     private static int cautionLevel = 0;
     private static int turnsTaken = 0;
-
     // Player
     private static String playerClass = "";
     private static int maxHp = 100;
     private static int playerHp = 100;
-
     // Enemies
     private static int spyHp = 60;
     private static boolean spyAlive = true;
-
     // SCP-096
     private static String scp096Room = "Sub-Level Maintenance Tunnel";
     private static boolean scp096Enraged = false;
@@ -411,7 +408,6 @@ public class Main {
             }
         } else {
             System.out.println("\n[Available Actions: movement, 'take keycard', 'take stimulant', 'search debris', 'help']");
-    
     }
     private static void processPlayerAction(String input) {
         if (currentRoom.equals("Research Laboratory") && spyAlive && isMovementCommand(input)) {
