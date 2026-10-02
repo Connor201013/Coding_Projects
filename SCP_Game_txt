@@ -411,15 +411,35 @@ public class Main {
             }
         } else {
             System.out.println("\n[Available Actions: movement, 'take keycard', 'take stimulant', 'search debris', 'help']");
-        }
+    
     }
     private static void processPlayerAction(String input) {
         if (currentRoom.equals("Research Laboratory") && spyAlive && isMovementCommand(input)) {
-            System.out.println("❌ Escape blocked! The enemy has pinned you down.");
-            if (!isO5()) {
-                panicLevel += isDClass() ? 1 : 2;
+            // UNARMED SYSTEM INTEGRATION: Check if they are fighting bare-handed first SOFTLOCK FIX ON SPY AMBUSH
+            if (!inventory.contains("sidearm")) {
+                System.out.println("\n🚨 NO WEAPON EQUIPPED! As you try to rush past, you are forced into hand-to-hand combat!");
+                int desperationDamage = 10 + RAND.nextInt(10) + (panicLevel / 2);
+                spyHp -= desperationDamage;
+                System.out.println("👊 You lunge forward blindly! You punch the spy squarely for " + desperationDamage + " damage!");
+                if (!isO5()) {
+                    panicLevel += isDClass() ? 2 : 4;
+                }
+                if (spyHp <= 0) {
+                    spyHp = 0;
+                    spyAlive = false;
+                    System.out.println("💀 Against all odds, you broke their guard and neutralized the agent with your bare fists!");
+                    System.out.println("The path is clear. You can now move freely next turn.");
+                } else {
+                    System.out.println("⚠️ The spy staggers but recovers! They maintain their blockade line.");
+                }
+            } else {
+                // If they DO have a gun, it displays your original pinned down message instead
+                System.out.println("❌ Escape blocked! The enemy has pinned you down.");
+                if (!isO5()) {
+                    panicLevel += isDClass() ? 1 : 2;
+                }
             }
-            return;
+            return; 
         }
         switch (input) {
             case "help", "h", "commands" -> displayHelpMenu();
