@@ -408,6 +408,7 @@ public class Main {
             }
         } else {
             System.out.println("\n[Available Actions: movement, 'take keycard', 'take stimulant', 'search debris', 'help']");
+        }
     }
     private static void processPlayerAction(String input) {
         if (currentRoom.equals("Research Laboratory") && spyAlive && isMovementCommand(input)) {
